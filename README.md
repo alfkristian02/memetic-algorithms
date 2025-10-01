@@ -1,2 +1,2 @@
 # memetic-algorithms
-Playground for creating MA(s) for the master thesis preperation
+Playground for creating MAs for the master thesis preparation
