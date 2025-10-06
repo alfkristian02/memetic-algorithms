@@ -7,9 +7,9 @@ module PopulationOperators
         return Random.bitrand((m, n))
     end
 
-    function random_replacement(population::BitMatrix, new_individuals::Vector{BitVector})::BitMatrix
-        # TODO
-        # hmm tanke-> hva er forskjellen på en BitMatrix og en BitVector? kan hende jeg kommer meg unna med å bruke kun den ene som hadde gjort ting sykt nice
-        return
-    end
+    # function random_replacement(population::BitMatrix, new_individuals::Vector{BitVector})::BitMatrix
+    #     # TODO
+    #     # hmm tanke-> hva er forskjellen på en BitMatrix og en BitVector? kan hende jeg kommer meg unna med å bruke kun den ene som hadde gjort ting sykt nice
+    #     return
+    # end
 end
