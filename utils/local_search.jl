@@ -34,7 +34,6 @@ module LocalSearch
             best_index = argmax(all_fitnesses[candidates_decimal_representation])
 
             best_children[i] = candidates[best_index]
-
         end
         
         return Tuple(best_children)
