@@ -20,7 +20,7 @@ module PopulationOperators
 
         candidates_decimal_representation = binary_to_decimal.(candidates_copy)
 
-        index_of_zero = findfirst(x -> x == 0, candidates_decimal_representation)
+        index_of_zero = findall(x -> x == 0, candidates_decimal_representation)
 
         if index_of_zero !== nothing
             deleteat!(candidates_decimal_representation, index_of_zero)
@@ -39,7 +39,7 @@ end
 
 if abspath(PROGRAM_FILE) == @__FILE__        
     test::BitMatrix = BitMatrix([1 0 1 ; 0 0 0])
-    vector::Vector{BitVector} = [[1, 1, 1]]
+    vector::BitVector = [1, 1, 1]
 
-    print(PopulationOperators.random_replacement(test, vector))
+    println(PopulationOperators.binary_to_decimal(vector))
 end
