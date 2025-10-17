@@ -17,15 +17,23 @@ using .BinaryDecimalConversion: binary_to_decimal
 using .PrecomputedFitness: get_precomputed_fitness
 
 using ProgressMeter
+using CSV
+using DataFrames
+using Dates
 
 all_fitnesses::Vector{Float64} = get_precomputed_fitness(dataset_file_name)
 
 population::BitMatrix = initialize_bit_matrix(population_size, number_of_features)
 
+best_individuals_through_time::Vector{Float64} = Vector{Float64}(undef, number_of_generations+1)
+
 # To show progress underway
 progress_meter = Progress(number_of_generations, dt=1, desc="Computing...")
 
 for generation = 1:number_of_generations
+
+    # save best individual in population
+    best_individuals_through_time[generation] = get_best_individual(population, all_fitnesses)[2]
 
     parents::Tuple{BitVector, BitVector} = random_selection(population)
     children::Tuple{BitVector, BitVector} = one_point_crossover(parents)
@@ -37,10 +45,14 @@ for generation = 1:number_of_generations
     next!(progress_meter)
 end
 
-# Give the best individual maybe?
-
 best_individual, fitness = get_best_individual(population, all_fitnesses)
 
-println(best_individual, fitness)
+# write the history to file
+best_individuals_through_time[number_of_generations+1] = fitness
+df = DataFrame(column_name = best_individuals_through_time)
+timestamp = Dates.format(now(), "yyyy-mm-dd_HH-MM-SS")
+filename = joinpath(@__DIR__, "runs", timestamp * ".csv")
+CSV.write(joinpath(@__DIR__, "runs/", filename), df)
 
+println(best_individual, fitness)
 println(all_fitnesses[argmax(all_fitnesses)])
