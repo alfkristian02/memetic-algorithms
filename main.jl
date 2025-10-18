@@ -1,33 +1,31 @@
 include("config.jl")
 include("utils/population.jl")
-include("utils/selection.jl")
 include("utils/crossover.jl")
 include("utils/mutation.jl")
 include("utils/local_search.jl")
-include("data/binary_decimal_conversion.jl")
-include("data/get_fitness.jl")
+include("data/get_fitness_pool.jl")
 
 using .ConfigParameters: population_size, number_of_features, number_of_generations, mutation_rate, dataset_file_name, local_search_frequency, local_search_depth
-using .PopulationOperators: initialize_bit_matrix, random_replacement, get_best_individual
-using .ParentSelectionOperators: random_selection
+
+using .GetFitnessPool: get_precomputed_fitness_pool
+using .PopulationOperators: initialize_bit_matrix, random_selection, random_replacement, get_best_individual
 using .CrossoverOperators: one_point_crossover
 using .MutationOperators: bit_flip_mutation
 using .LocalSearch: hamming_neighborhood_search
-using .BinaryDecimalConversion: binary_to_decimal
-using .PrecomputedFitness: get_precomputed_fitness
 
 using ProgressMeter
 using CSV
 using DataFrames
 using Dates
 
-all_fitnesses::Vector{Float64} = get_precomputed_fitness(dataset_file_name)
+
+all_fitnesses::Vector{Float64} = get_precomputed_fitness_pool(joinpath(@__DIR__, "data/precomputed_tables/", dataset_file_name))
 
 population::BitMatrix = initialize_bit_matrix(population_size, number_of_features)
 
 best_individuals_through_time::Vector{Float64} = Vector{Float64}(undef, number_of_generations+1)
 
-# To show progress underway
+# To show progress bar during execution
 progress_meter = Progress(number_of_generations, dt=1, desc="Computing...")
 
 for generation = 1:number_of_generations
@@ -35,17 +33,17 @@ for generation = 1:number_of_generations
     # save best individual in population
     best_individuals_through_time[generation] = get_best_individual(population, all_fitnesses)[2]
 
-    parents::Tuple{BitVector, BitVector} = random_selection(population)
-    children::Tuple{BitVector, BitVector} = one_point_crossover(parents)
-    mutated_children::Tuple{BitVector, BitVector} = bit_flip_mutation(children, mutation_rate)
+    parents::Vector{BitVector} = random_selection(population, 2)
+    children::Tuple{BitVector, BitVector} = one_point_crossover(parents[1], parents[2])
+    mutated_children::Vector{BitVector} = bit_flip_mutation(collect(children), mutation_rate)
 
     if generation%local_search_frequency == 0
         mutated_children = hamming_neighborhood_search(mutated_children, all_fitnesses, local_search_depth)
     end
 
-    new_population::BitMatrix = random_replacement(population, mutated_children)
+    new_population::BitMatrix = random_replacement(population, collect(mutated_children))
     
-    # Update progress
+    # Update progress bar
     next!(progress_meter)
 end
 

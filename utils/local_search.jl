@@ -1,9 +1,12 @@
 module LocalSearch
     export hamming_neighborhood_search
 
-    include("../data/binary_decimal_conversion.jl")
+    include("number_conversion.jl")
     using .BinaryDecimalConversion: binary_to_decimal
     
+    """
+        Returns all index combinations, requiring bit flips, to represent the neighborhood with hamming distance equal to h.
+    """
     function combinations(n::Int, h::Int)::Vector{Vector{Int}}
         if h==0 return [[]] end
         if h > n return [] end
@@ -18,7 +21,10 @@ module LocalSearch
 
         return result
     end
-    
+
+    """
+        Get the neighbors of individual with hamming distance lower than, or equal to, depth.
+    """
     function get_neighborhood(individual::BitVector, depth::Int)::Vector{BitVector}
         n::Int = length(individual)
         neighbors::Vector{BitVector} = []
@@ -40,9 +46,11 @@ module LocalSearch
         return neighbors
     end
 
-
-    function hamming_neighborhood_search(children::Tuple{BitVector, BitVector}, all_fitnesses::Vector{Float64}, depth::Int)::Tuple{BitVector, BitVector}
-        best_children = Vector{BitVector}(undef, 2)
+    """
+        Find the best individual in each children’s neighborhood of hamming distance lower than, or equal to, depth. 
+    """
+    function hamming_neighborhood_search(children::Vector{BitVector}, all_fitnesses::Vector{Float64}, depth::Int)::Vector{BitVector}
+        best_children = Vector{BitVector}(undef, length(children))
 
         for i in eachindex(children)
             candidates = get_neighborhood(children[i], depth)
@@ -62,7 +70,7 @@ module LocalSearch
             best_children[i] = candidates[best_index]
         end
         
-        return Tuple(best_children)
+        return best_children
     end
 end
 

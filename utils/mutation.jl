@@ -1,8 +1,13 @@
 module MutationOperators
     export bit_flip_mutation
 
-    function bit_flip_mutation(children::Tuple{BitVector, BitVector}, mutation_rate::Float64)::Tuple{BitVector, BitVector}
-        for child in children
+    """
+        Flip a bit with probability equal to the mutation rate.
+    """
+    function bit_flip_mutation(children::Vector{BitVector}, mutation_rate::Float64)::Vector{BitVector}
+        children_copy = copy(children)
+        
+        for child in children_copy
             for i in eachindex(child)
                 if rand() < mutation_rate
                     child[i] = 1 - child[i]
@@ -10,6 +15,6 @@ module MutationOperators
             end
         end
 
-        return children
+        return children_copy
     end
 end

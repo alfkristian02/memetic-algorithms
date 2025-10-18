@@ -1,21 +1,46 @@
 module PopulationOperators
+    export initialize_bit_matrix, random_selection, random_replacement, get_best_individual
+
     using Random
 
-    export initialize_bit_matrix, random_replacement, get_best_individual
+    include("number_conversion.jl")
+    using .BinaryDecimalConversion: binary_to_decimal
 
+    """
+        Initialize a bit matrix with m rows and n columns.
+    """
     function initialize_bit_matrix(m::Int, n::Int)::BitMatrix
         return Random.bitrand((m, n))
     end
+    
+    """
+        Select n random individuals from the population.
 
-    function random_replacement(population::BitMatrix, new_individuals::Tuple{BitVector, BitVector})::BitMatrix
-        indexes = rand(1:size(population, 1), length(new_individuals))
+    """
+    function random_selection(population::BitMatrix, n::Int)::Vector{BitVector}
+        indices = rand(1:size(population, 1), n)
 
-        population[indexes, :] = vcat(new_individuals...)
+        return eachrow(population)[indices]
+    end
+
+    
+    """
+        Replace randomly selected individuals in the population with the incoming ones.
+
+    """
+    function random_replacement(population::BitMatrix, incoming_individuals::Vector{BitVector})::BitMatrix
+        indices = rand(1:size(population, 1), length(incoming_individuals))
+
+        population[indices, :] = vcat(incoming_individuals...)
 
         return population
     end
 
-    function get_best_individual(candidates::BitMatrix, all_fitnesses::Vector{Float64})::Tuple{BitVector, Float64}
+    """
+        Get the best individual among the candidates, given a fitness pool.
+
+    """
+    function get_best_individual(candidates::BitMatrix, fitness_pool::Vector{Float64})::Tuple{BitVector, Float64}
         candidates_copy = [copy(row) for row in eachrow(candidates)]
 
         candidates_decimal_representation = binary_to_decimal.(candidates_copy)
@@ -27,13 +52,9 @@ module PopulationOperators
             deleteat!(candidates_copy, index_of_zero)
         end
 
-        best_index = argmax(all_fitnesses[candidates_decimal_representation])
+        best_index = argmax(fitness_pool[candidates_decimal_representation])
 
-        return candidates_copy[best_index], all_fitnesses[candidates_decimal_representation[best_index]]
-    end
-
-    function binary_to_decimal(bit_vector::BitVector)::Int
-        return sum(bit_vector .* 2 .^(length(bit_vector) .- eachindex(bit_vector)))
+        return candidates_copy[best_index], fitness_pool[candidates_decimal_representation[best_index]]
     end
 end
 
