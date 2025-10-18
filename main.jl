@@ -7,12 +7,12 @@ include("utils/local_search.jl")
 include("data/binary_decimal_conversion.jl")
 include("data/get_fitness.jl")
 
-using .ConfigParameters: population_size, number_of_features, number_of_generations, mutation_rate, dataset_file_name
+using .ConfigParameters: population_size, number_of_features, number_of_generations, mutation_rate, dataset_file_name, local_search_frequency, local_search_depth
 using .PopulationOperators: initialize_bit_matrix, random_replacement, get_best_individual
 using .ParentSelectionOperators: random_selection
 using .CrossoverOperators: one_point_crossover
 using .MutationOperators: bit_flip_mutation
-using .LocalSearch: hamming_one_neighborhood_search
+using .LocalSearch: hamming_neighborhood_search
 using .BinaryDecimalConversion: binary_to_decimal
 using .PrecomputedFitness: get_precomputed_fitness
 
@@ -38,8 +38,12 @@ for generation = 1:number_of_generations
     parents::Tuple{BitVector, BitVector} = random_selection(population)
     children::Tuple{BitVector, BitVector} = one_point_crossover(parents)
     mutated_children::Tuple{BitVector, BitVector} = bit_flip_mutation(children, mutation_rate)
-    improved_children::Tuple{BitVector, BitVector} = hamming_one_neighborhood_search(mutated_children, all_fitnesses)
-    new_population::BitMatrix = random_replacement(population, improved_children)
+
+    if generation%local_search_frequency == 0
+        mutated_children = hamming_neighborhood_search(mutated_children, all_fitnesses, local_search_depth)
+    end
+
+    new_population::BitMatrix = random_replacement(population, mutated_children)
     
     # Update progress
     next!(progress_meter)
@@ -50,7 +54,7 @@ best_individual, fitness = get_best_individual(population, all_fitnesses)
 # write the history to file
 best_individuals_through_time[number_of_generations+1] = fitness
 df = DataFrame(column_name = best_individuals_through_time)
-timestamp = Dates.format(now(), "yyyy-mm-dd_HH-MM-SS")
+timestamp = Dates.format(now(), "yyyymmddHHMMSS")
 filename = joinpath(@__DIR__, "runs", timestamp * ".csv")
 CSV.write(joinpath(@__DIR__, "runs/", filename), df)
 
