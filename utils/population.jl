@@ -1,10 +1,8 @@
 module PopulationOperators
-    export initialize_bit_matrix, random_selection, random_replacement, get_best_individual
+    export initialize_bit_matrix, random_selection, random_replacement, get_best_individual, roulette_wheel_selection
 
     using Random
-
-    include("number_conversion.jl")
-    using .BinaryDecimalConversion: binary_to_decimal
+    using StatsBase
 
     """
         Initialize a bit matrix with m rows and n columns.
@@ -23,7 +21,19 @@ module PopulationOperators
         return eachrow(population)[indices]
     end
 
-    
+    """
+        Roulette wheel selection.
+    """
+    function roulette_wheel_selection(population::BitMatrix, fitness_function::Function, n::Int)::Vector{BitVector}
+        fitness_map = map(fitness_function, eachrow(population))
+
+        probability_proportions = fitness_map ./ sum(fitness_map)
+
+        selected = sample(eachrow(population), Weights(probability_proportions), n)
+
+        return Vector{BitVector}(selected)
+    end
+
     """
         Replace randomly selected individuals in the population with the incoming ones.
 
@@ -40,21 +50,10 @@ module PopulationOperators
         Get the best individual among the candidates, given a fitness pool.
 
     """
-    function get_best_individual(candidates::BitMatrix, fitness_pool::Vector{Float64})::Tuple{BitVector, Float64}
-        candidates_copy = [copy(row) for row in eachrow(candidates)]
+    function get_best_individual(candidates::BitMatrix, fitness_function)::Tuple{BitVector, Float64}
+        fitness, best_index = findmax(map(fitness_function, eachrow(candidates)))
 
-        candidates_decimal_representation = binary_to_decimal.(candidates_copy)
-
-        index_of_zero = findall(x -> x == 0, candidates_decimal_representation)
-
-        if index_of_zero !== nothing
-            deleteat!(candidates_decimal_representation, index_of_zero)
-            deleteat!(candidates_copy, index_of_zero)
-        end
-
-        best_index = argmax(fitness_pool[candidates_decimal_representation])
-
-        return candidates_copy[best_index], fitness_pool[candidates_decimal_representation[best_index]]
+        return candidates[best_index, :], fitness
     end
 end
 
