@@ -1,8 +1,5 @@
 module LocalSearch
     export hamming_neighborhood_search
-
-    include("number_conversion.jl")
-    using .BinaryDecimalConversion: binary_to_decimal
     
     """
         Returns all index combinations, requiring bit flips, to represent the neighborhood with hamming distance equal to h.
@@ -49,23 +46,14 @@ module LocalSearch
     """
         Find the best individual in each children’s neighborhood of hamming distance lower than, or equal to, depth. 
     """
-    function hamming_neighborhood_search(children::Vector{BitVector}, all_fitnesses::Vector{Float64}, depth::Int)::Vector{BitVector}
+    function hamming_neighborhood_search(children::Vector{BitVector}, fitness_function, depth::Int)::Vector{BitVector}
         best_children = Vector{BitVector}(undef, length(children))
 
         for i in eachindex(children)
             candidates = get_neighborhood(children[i], depth)
             push!(candidates, children[i])
 
-            candidates_decimal_representation = binary_to_decimal.(candidates)
-
-            index_of_zero = findfirst(x -> x == 0, candidates_decimal_representation)
-
-            if index_of_zero !== nothing
-                deleteat!(candidates_decimal_representation, index_of_zero)
-                deleteat!(candidates, index_of_zero)
-            end
-
-            best_index = argmax(all_fitnesses[candidates_decimal_representation])
+            best_index = argmax(map(fitness_function, candidates))
 
             best_children[i] = candidates[best_index]
         end
