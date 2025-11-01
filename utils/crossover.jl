@@ -33,7 +33,7 @@ module CrossoverOperators
             if rand() < crossover_probability
                 new_individuals[i], new_individuals[i+1] = one_point_crossover(individuals[i], individuals[i+1])
             else
-                new_individuals[i], new_population[i+1] = individuals[i], individuals[i+1]
+                new_individuals[i], new_individuals[i+1] = individuals[i], individuals[i+1]
             end
         end
 

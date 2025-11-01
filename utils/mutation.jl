@@ -4,17 +4,17 @@ module MutationOperators
     """
         Flip a bit with probability equal to the mutation rate.
     """
-    function bit_flip_mutation(children::Vector{BitVector}, mutation_rate::Float64)::Vector{BitVector}
-        children_copy = copy(children)
+    function bit_flip_mutation(individuals::Vector{BitVector}, mutation_rate::Float64)::Vector{BitVector}
+        individuals_copy = copy(individuals)
         
-        for child in children_copy
-            for i in eachindex(child)
+        for individual in individuals_copy
+            for i in eachindex(individual)
                 if rand() < mutation_rate
-                    child[i] = 1 - child[i]
+                    individual[i] = 1 - individual[i]
                 end
             end
         end
 
-        return children_copy
+        return individuals_copy
     end
 end
