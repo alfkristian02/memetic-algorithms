@@ -1,5 +1,5 @@
 module LocalSearch
-    export hamming_neighborhood_search
+    export hamming_neighborhood_search, SLS
     
     """
         Returns all index combinations, requiring bit flips, to represent the neighborhood with hamming distance equal to h.
@@ -46,7 +46,7 @@ module LocalSearch
     """
         Find the best individual in each children’s neighborhood of hamming distance lower than, or equal to, depth. 
     """
-    function hamming_neighborhood_search(children::Vector{BitVector}, fitness_function, depth::Int)::Vector{BitVector}
+    function hamming_neighborhood_search(children::Vector{BitVector}, fitness_function::Function, depth::Int)::Vector{BitVector}
         best_children = Vector{BitVector}(undef, length(children))
 
         for i in eachindex(children)
@@ -59,6 +59,31 @@ module LocalSearch
         end
         
         return best_children
+    end
+
+    """
+        SLS
+    """
+    function SLS(individuals::Vector{BitVector}, fitness_function::Function, depth::Int, p::Float64)
+        final_individuals = Vector{BitVector}(undef, length(individuals))
+        
+        for i in eachindex(individuals)
+            current_individual = individuals[i]
+
+            for j in 1:depth
+                candidates = get_neighborhood(current_individual, 1)
+
+                if rand() < p # Go to random neighbor
+                    current_individual = rand(candidates)
+                else
+                    current_individual = ([candidates... , current_individual])[argmax(map(fitness_function, [candidates..., current_individual]))]
+                end
+            end
+
+            final_individuals[i] = current_individual
+        end
+
+        return final_individuals
     end
 end
 

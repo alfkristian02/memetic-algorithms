@@ -17,7 +17,7 @@ module SGA
         The only alternation to the original one, is that there is an optional parameter (local_search)
         used to perform local search if present.
     """
-    function sga(population_size::Int, number_of_features::Int, number_of_generations::Int, fitness_function::Function, crossover_probability::Float64, mutation_probability::Float64, save_run::Bool, local_search=nothing)
+    function sga(population_size::Int, number_of_features::Int, number_of_generations::Int, fitness_function::Function, crossover_probability::Float64, mutation_probability::Float64, save_run::Bool, local_search_frequency::Int, local_search_depth::Int, sls_p::Float64, local_search=nothing)
         population::BitMatrix = initialize_bit_matrix(population_size, number_of_features)
 
         best_per_generation::Union{Vector{Float64}, Nothing} = nothing
@@ -38,7 +38,11 @@ module SGA
 
             mutations::Vector{BitVector} = bit_flip_mutation(offspring, mutation_probability) 
             
-            # TODO: perform LS if parameter is present. Take heed to LS depth and frequency
+            if local_search !== nothing && local_search_frequency !== nothing && local_search_depth !== nothing && sls_p !== nothing
+                if generation%local_search_frequency == 0
+                    mutations = local_search(mutations, fitness_function, local_search_depth, sls_p)
+                end
+            end
 
             population = reshape(reduce(vcat, mutations), population_size, number_of_features)
 

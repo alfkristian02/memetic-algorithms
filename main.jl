@@ -7,12 +7,14 @@ include("data/get_fitness_pool.jl")
 include("utils/number_conversion.jl")
 include("utils/first_try.jl")
 include("utils/SGA.jl")
+include("utils/local_search.jl")
 
-using .ConfigParameters: population_size, number_of_features, number_of_generations, mutation_rate, dataset_file_name, local_search_frequency, local_search_depth, save_run, crossover_probability
+using .ConfigParameters: population_size, number_of_features, number_of_generations, mutation_rate, dataset_file_name, local_search_frequency, local_search_depth, save_run, crossover_probability, sls_p
 using .GetFitnessPool: get_precomputed_fitness_pool
 using .BinaryDecimalConversion: binary_to_decimal, decimal_to_binary
 using .AlfKristianMemeticAlgorithm: first_try
 using .SGA: sga
+using .LocalSearch: SLS
 
 
 const load_fitness::Vector{Float64} = get_precomputed_fitness_pool(joinpath(@__DIR__, "data/precomputed_tables/", dataset_file_name))
@@ -30,7 +32,7 @@ end
 
 # Run algorithm
 # best_individual, best_fitness, history = first_try(population_size, number_of_features, number_of_generations, fitness_function, mutation_rate, local_search_frequency, local_search_depth, save_run)
-best_individual, best_fitness, history = sga(population_size, number_of_features, number_of_generations, fitness_function, crossover_probability, mutation_rate, save_run)
+best_individual, best_fitness, history = sga(population_size, number_of_features, number_of_generations, fitness_function, crossover_probability, mutation_rate, save_run, local_search_frequency, local_search_depth, sls_p, SLS)
 
 
 if save_run
