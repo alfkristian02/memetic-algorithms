@@ -29,7 +29,7 @@ def plot_csv(csv_file):
 
         plt.xlabel("Index")
         plt.ylabel("Values")
-        plt.grid(True)
+        plt.grid()
         plt.tight_layout()
         plt.show()
 

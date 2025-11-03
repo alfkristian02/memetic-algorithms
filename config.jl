@@ -6,11 +6,11 @@ module ConfigParameters
     local_search_depth::Int = 1      # will be the hamming distance, at least for now
 
     population_size::Int = 500
-    number_of_features::Int = 19
-    number_of_generations::Int = 10000
-    crossover_probability::Float64 = 0.8
-    mutation_rate::Float64 = 0.2
-    dataset_file_name::String = "10-hepatitis_dt_matG.jld2" # 01-seeds_dt_mat-1, 04-glass_dt_mat-1, 05-heart-c_dt_mat-1, 10-hepatitis_dt_matG
+    number_of_features::Int = 9
+    number_of_generations::Int = 1000
+    crossover_probability::Float64 = 0.5
+    mutation_rate::Float64 = 0.1
+    dataset_file_name::String = "04-glass_dt_mat-1.jld2" # 01-seeds_dt_mat-1, 04-glass_dt_mat-1, 05-heart-c_dt_mat-1, 10-hepatitis_dt_matG
 
     save_run::Bool = 1
 

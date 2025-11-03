@@ -19,12 +19,13 @@ module SGA
     """
     function sga(population_size::Int, number_of_features::Int, number_of_generations::Int, fitness_function::Function, crossover_probability::Float64, mutation_probability::Float64, save_run::Bool, local_search_frequency::Int, local_search_depth::Int, sls_p::Float64, local_search=nothing)
         population::BitMatrix = initialize_bit_matrix(population_size, number_of_features)
+        global_best_individual = get_best_individual(population, fitness_function)
 
         best_per_generation::Union{Vector{Float64}, Nothing} = nothing
 
         if save_run
             best_per_generation = Vector{Float64}(undef, number_of_generations+1)
-            best_per_generation[1] = get_best_individual(population, fitness_function)[2]
+            best_per_generation[1] = global_best_individual[2]
         end
 
         progress_meter = Progress(number_of_generations, dt=1, desc="Computing...")
@@ -46,13 +47,19 @@ module SGA
 
             population = reshape(reduce(vcat, mutations), population_size, number_of_features)
 
+            best_individual = get_best_individual(population, fitness_function)
+            
+            if best_individual[2] > global_best_individual[2]
+                global_best_individual = best_individual
+            end
+
             if save_run
-                best_per_generation[generation] = get_best_individual(population, fitness_function)[2]
+                best_per_generation[generation + 1] = best_individual[2]
             end
 
             next!(progress_meter)
         end
 
-        return get_best_individual(population, fitness_function)..., best_per_generation
+        return global_best_individual..., best_per_generation
     end
 end
