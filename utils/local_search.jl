@@ -1,5 +1,5 @@
 module LocalSearch
-    export hamming_neighborhood_search, SLS
+    export hamming_neighborhood_search, SLS, get_neighborhood
     
     """
         Returns all index combinations, requiring bit flips, to represent the neighborhood with hamming distance equal to h.
