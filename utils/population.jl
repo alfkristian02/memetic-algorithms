@@ -47,7 +47,7 @@ module PopulationOperators
     end
 
     """
-        Get the best individual among the candidates, given a fitness pool.
+        Get the best individual and fitness of the individual among the candidates, given a fitness pool.
 
     """
     function get_best_individual(candidates::BitMatrix, fitness_function)::Tuple{BitVector, Float64}
