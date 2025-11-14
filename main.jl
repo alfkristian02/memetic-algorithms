@@ -10,15 +10,17 @@ include("utils/first_try.jl")
 include("utils/SGA.jl")
 include("utils/local_search.jl")
 
-using .ConfigParameters: population_size, number_of_features, number_of_generations, mutation_rate, dataset_file_name, local_search_frequency, local_search_depth, save_run, crossover_probability, sls_p
+using .ConfigParameters: population_size, number_of_generations, mutation_rate, dataset_file_name, local_search_frequency, local_search_depth, save_run, crossover_probability, sls_p
 using .GetFitnessPool: get_precomputed_fitness_pool
 using .BinaryDecimalConversion: binary_to_decimal, decimal_to_binary
 using .SGA: sga
 using .LocalSearch: SLS
 
+println("Starting computation...")
 
 const load_fitness::Vector{Float64} = get_precomputed_fitness_pool(joinpath(@__DIR__, "data/precomputed_tables/", dataset_file_name))
 const global_optima::Float64 = maximum(load_fitness)
+const number_of_features::Int = log2(1+length(load_fitness))
 
 function fitness_function(individual)::Float64
     decimal_representation::Int = binary_to_decimal(BitVector(individual))
