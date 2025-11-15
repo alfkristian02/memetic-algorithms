@@ -10,15 +10,17 @@ include("utils/first_try.jl")
 include("utils/SGA.jl")
 include("utils/local_search.jl")
 
-using .ConfigParameters: population_size, number_of_features, number_of_generations, mutation_rate, dataset_file_name, local_search_frequency, local_search_depth, save_run, crossover_probability, sls_p
+using .ConfigParameters: population_size, number_of_generations, mutation_rate, dataset_file_name, local_search_frequency, local_search_depth, save_run, crossover_probability, sls_p
 using .GetFitnessPool: get_precomputed_fitness_pool
 using .BinaryDecimalConversion: binary_to_decimal, decimal_to_binary
 using .SGA: sga
 using .LocalSearch: SLS
 
+println("Starting computation...")
 
 const load_fitness::Vector{Float64} = get_precomputed_fitness_pool(joinpath(@__DIR__, "data/precomputed_tables/", dataset_file_name))
 const global_optima::Float64 = maximum(load_fitness)
+const number_of_features::Int = log2(1+length(load_fitness))
 
 function fitness_function(individual)::Float64
     decimal_representation::Int = binary_to_decimal(BitVector(individual))
@@ -32,18 +34,59 @@ end
 
 
 timestamp = Dates.format(now(), "mmddHHMM")
-filename = joinpath(@__DIR__, "runs", "frequency_" * timestamp * ".csv")
+filename = joinpath(@__DIR__, "runs", "no_local_search_" * timestamp * ".csv")
 
 
-@showprogress "Iterating the frequencies: " for i in eachindex(local_search_frequency)
+# @showprogress "Iterating the local search depth: " for i in eachindex(local_search_depth)
+#     for _ in 1:100
+#         best_individual, best_fitness, history, fitness_function_accesses = sga(population_size, number_of_features, number_of_generations, fitness_function, crossover_probability, mutation_rate, save_run, local_search_frequency, local_search_depth[i], sls_p, global_optima, SLS)
+
+#         if save_run
+#             df = DataFrame(
+#                 local_search_depth = local_search_depth[i],
+#                 history = Ref(history),
+#                 fitness_function_accesses = fitness_function_accesses
+#             )
+#             CSV.write(filename, df; append=isfile(filename))
+#         end
+#     end
+# end
+
+# for _ in 1:100
+#     best_individual, best_fitness, history, fitness_function_accesses = sga(population_size, number_of_features, number_of_generations, fitness_function, crossover_probability, mutation_rate, save_run, local_search_frequency, 5, sls_p, global_optima, SLS)
+
+#     if save_run
+#         df = DataFrame(
+#             local_search_depth = 5,
+#             history = Ref(history),
+#             fitness_function_accesses = fitness_function_accesses
+#         )
+#         CSV.write(filename, df; append=isfile(filename))
+#     end
+# end
+
+# for _ in 1:10000
+#     best_individual, best_fitness, history, fitness_function_accesses = sga(population_size, number_of_features, number_of_generations, fitness_function, crossover_probability, mutation_rate, save_run, 0, 0, .0, global_optima)
+
+#     if save_run
+#         df = DataFrame(
+#             history = Ref(history),
+#             fitness_function_accesses = fitness_function_accesses
+#         )
+#         CSV.write(filename, df; append=isfile(filename))
+#     end
+# end
+
+@showprogress "Iterating the local search depth: " for i in 1:5
     for _ in 1:100
-        best_individual, best_fitness, history, fitness_function_accesses = sga(population_size, number_of_features, number_of_generations, fitness_function, crossover_probability, mutation_rate, save_run, local_search_frequency[i], local_search_depth, sls_p, global_optima, SLS)
+        best_individual, best_fitness, history, fitness_function_accesses = sga(population_size, number_of_features, number_of_generations, fitness_function, crossover_probability, mutation_rate, save_run, 75, i, sls_p, global_optima, SLS)
 
         if save_run
             df = DataFrame(
-                local_search_frequency = local_search_frequency[i],
+                local_search_depth = i,
                 history = Ref(history),
-                fitness_function_accesses = fitness_function_accesses
+                fitness_function_accesses = fitness_function_accesses,
+                local_search_frequency = 75
             )
             CSV.write(filename, df; append=isfile(filename))
         end
