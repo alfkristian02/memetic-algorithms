@@ -2,7 +2,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import ast
 from statsmodels.nonparametric.smoothers_lowess import lowess
-import numpy as np
 
 frequency_path = "./runs/frequency_11142225.csv"
 
@@ -21,9 +20,11 @@ try:
     y = grouped[frequency_df.columns[0]].first()
 
     # load other df
-    sga_df = pd.read_csv("./runs/no_local_search_11151124.csv")
-    sga_df['history'] = sga_df['history'].apply(ast.literal_eval)
-    sga_y = sga_df['history'].apply(len).mean()
+    # sga_df = pd.read_csv("./runs/no_local_search_11151124.csv")
+    # sga_df['history'] = sga_df['history'].apply(ast.literal_eval)
+    # sga_y = sga_df['history'].apply(len).mean()
+    sga_y = 1119.8609
+    # print(sga_y)
 
     plt.figure(figsize=(10, 6))
 

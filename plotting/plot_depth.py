@@ -2,9 +2,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import ast
 from statsmodels.nonparametric.smoothers_lowess import lowess
-import numpy as np
 
-frequency_path = "./runs/depth_11142115.csv"
+frequency_path = "./runs/depth_11151748.csv"
 
 try:
     frequency_df = pd.read_csv(frequency_path)
@@ -21,16 +20,17 @@ try:
     y = grouped[frequency_df.columns[0]].first()
 
     # load other df
-    sga_df = pd.read_csv("./runs/no_local_search_11151124.csv")
-    sga_df['history'] = sga_df['history'].apply(ast.literal_eval)
-    sga_y = sga_df['history'].apply(len).mean()
+    # sga_df = pd.read_csv("./runs/no_local_search_11151124.csv")
+    # sga_df['history'] = sga_df['history'].apply(ast.literal_eval)
+    # sga_y = sga_df['history'].apply(len).mean()
+    sga_y = 1119.8609
+    # print(sga_y)
 
     plt.figure(figsize=(10, 6))
 
     # plot grouped series
     plt.plot(y, x, marker='o', label='Grouped Averages')
 
-    # --- LOWESS smooth curve (added) ---
     x_vals = y.values.astype(float)
     y_vals = x.values.astype(float)
     smooth = lowess(y_vals, x_vals, frac=0.3)
