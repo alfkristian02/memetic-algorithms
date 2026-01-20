@@ -4,10 +4,12 @@ module SGA
     include("population.jl")
     include("crossover.jl")
     include("mutation.jl")
+    include("diversity_metrics.jl")
 
     using .PopulationOperators: initialize_bit_matrix, roulette_wheel_selection, get_best_individual
     using .CrossoverOperators: one_point_crossover
     using .MutationOperators: bit_flip_mutation
+    using .DiversityMetrics: average_hamming_distance
 
     """
         Implementation of the Simple Genetic Algorithm (SGA)
@@ -36,7 +38,7 @@ module SGA
 
             mutations::Vector{BitVector} = bit_flip_mutation(offspring, mutation_probability) 
             
-            if local_search !== nothing && local_search_frequency !== nothing && local_search_depth !== nothing && sls_p !== nothing
+            if local_search !== nothing && local_search_frequency !== nothing && local_search_frequency !== 0 && local_search_depth !== nothing && sls_p !== nothing
                 if generation%local_search_frequency == 0
                     mutations = local_search(mutations, fitness_function, local_search_depth, sls_p)
                     fitness_function_accesses += sum(binomial(number_of_features, k) for k in 0:local_search_depth)
@@ -61,6 +63,6 @@ module SGA
             end
         end
 
-        return global_best_individual..., best_per_generation, fitness_function_accesses
+        return global_best_individual..., best_per_generation, fitness_function_accesses, DiversityMetrics.average_hamming_distance([BitVector(population[i, :]) for i in 1:size(population, 1)])
     end
 end
