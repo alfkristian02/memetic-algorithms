@@ -27,5 +27,13 @@ Manifest*.toml
 LocalPreferences.toml
 JuliaLocalPreferences.toml
 
+# data sets - precomputed tables
 data/*/
-runs/*
+
+# Output files for when running jobs
+idun
+
+# sh job scheduling
+*.slurm
+
+.DS_Store
