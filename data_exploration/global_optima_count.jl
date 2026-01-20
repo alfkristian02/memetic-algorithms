@@ -6,7 +6,7 @@ include("../utils/local_search.jl")
 using .ConfigParameters: EPSILON
 using .GetFitnessPool: get_precomputed_fitness_pool
 using .BinaryDecimalConversion: decimal_to_binary, binary_to_decimal
-using .LocalSearch: get_neighborhood
+
 
 const file_name::String = "05-heart-c_dt_mat-1.jld2" # 05-heart-c_dt_mat-1.jld2 || 07-credit-a_dt_matG.jld2 || 10-hepatitis_dt_matG.jld2
 const load_fitness::Vector{Float64} = get_precomputed_fitness_pool(joinpath(@__DIR__, "../data/precomputed_tables/", file_name))
@@ -25,20 +25,15 @@ function fitness_function(individual)::Float64
     return base_fitness - EPSILON * penalty
 end
 
-
-count_optima::Int = 0
+all_fitness_values = Vector{Float64}(undef, length(load_fitness))
 
 for value in eachindex(load_fitness)
     binary = decimal_to_binary(value, number_of_features)
-    current_fitness = fitness_function(binary)
-
-    neighborhood = get_neighborhood(binary, 1)
-
-    best_fitness = findmax(map(fitness_function, neighborhood))[1]
-
-    if current_fitness >= best_fitness
-        global count_optima += 1
-    end
+    all_fitness_values[value] = fitness_function(binary)
 end
 
-println("Number of local optima: ", count_optima)
+global_max_fitness = maximum(all_fitness_values)
+count_global_optima = count(==(global_max_fitness), all_fitness_values)
+
+println("Global optimum fitness value: ", global_max_fitness)
+println("Number of global optima: ", count_global_optima)
