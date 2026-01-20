@@ -32,6 +32,7 @@ data/*/
 
 # Output files for when running jobs
 idun
+runs
 
 # sh job scheduling
 *.slurm
