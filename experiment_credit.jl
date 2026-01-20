@@ -15,7 +15,7 @@ using .BinaryDecimalConversion: binary_to_decimal, decimal_to_binary
 using .SGA: sga
 using .LocalSearch: SLS
 
-const dataset_file_name::String = "fill here"
+const dataset_file_name::String = "07-credit-a_dt_matG.jld2"
 
 println("Starting computation...")
 
@@ -39,7 +39,7 @@ const number_of_features::Int = log2(1+length(load_base_fitness))
 const global_optima::Float64 = fitness_function(decimal_to_binary(findmax(load_base_fitness)[2], number_of_features))
 
 const timestamp = Dates.format(now(), "mmddHHMM")
-const filename = joinpath(@__DIR__, "runs", "main_" * dataset_file_name * "_" * timestamp * ".csv")
+const filename = joinpath(@__DIR__, "runs", "credit_" * dataset_file_name * "_" * timestamp * ".csv")
 
 for i in eachindex(local_search_frequencies)
     for j in eachindex(local_search_depths)
