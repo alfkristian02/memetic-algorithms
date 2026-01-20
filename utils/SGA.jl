@@ -17,7 +17,7 @@ module SGA
         The only alternation to the original one, is that there is an optional parameter (local_search)
         used to perform local search if present.
     """
-    function sga(population_size::Int, number_of_features::Int, number_of_generations::Int, fitness_function::Function, crossover_probability::Float64, mutation_probability::Float64, save_run::Bool, local_search_frequency::Int, local_search_depth::Int, sls_p::Float64, global_optima, local_search=nothing)
+    function sga(population_size::Int, number_of_features::Int, number_of_generations::Int, fitness_function::Function, crossover_probability::Float64, mutation_probability::Float64, save_run::Bool, local_search_frequency::Float64, local_search_depth::Int, sls_p::Float64, global_optima, local_search=nothing)
         population::BitMatrix = initialize_bit_matrix(population_size, number_of_features)
         global_best_individual = get_best_individual(population, fitness_function)
         fitness_function_accesses::Int = 0
@@ -28,7 +28,7 @@ module SGA
             push!(best_per_generation, global_best_individual[2])
         end
 
-        for generation = 1:number_of_generations
+        for _ = 1:number_of_generations
             parents::Vector{BitVector} = roulette_wheel_selection(population, fitness_function, size(population, 1))
 
             fitness_function_accesses += population_size
@@ -38,8 +38,8 @@ module SGA
 
             mutations::Vector{BitVector} = bit_flip_mutation(offspring, mutation_probability) 
             
-            if local_search !== nothing && local_search_frequency !== nothing && local_search_frequency !== 0 && local_search_depth !== nothing && sls_p !== nothing
-                if generation%local_search_frequency == 0
+            if local_search !== nothing && local_search_frequency !== 0.0 && local_search_depth !== nothing && sls_p !== nothing
+                if rand() < local_search_frequency
                     mutations = local_search(mutations, fitness_function, local_search_depth, sls_p)
                     fitness_function_accesses += sum(binomial(number_of_features, k) for k in 0:local_search_depth)
                 end

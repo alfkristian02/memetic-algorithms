@@ -9,18 +9,17 @@ include("utils/first_try.jl")
 include("utils/SGA.jl")
 include("utils/local_search.jl")
 
-using .ConfigParameters: population_size, number_of_generations, mutation_rate, local_search_frequencies, local_search_depths, save_run, crossover_probability, sls_p
+using .ConfigParameters: population_size, number_of_generations, mutation_rate, local_search_frequencies, local_search_depths, save_run, crossover_probability, sls_p, EPSILON
 using .GetFitnessPool: get_precomputed_fitness_pool
 using .BinaryDecimalConversion: binary_to_decimal, decimal_to_binary
 using .SGA: sga
 using .LocalSearch: SLS
 
-const dataset_file_name::String = "fill here"
+const dataset_file_name::String = "05-heart-c_dt_mat-1.jld2" # 05-heart-c_dt_mat-1.jld2 || 07-credit-a_dt_matG.jld2 || 10-hepatitis_dt_matG.jld2
 
 println("Starting computation...")
 
 const load_base_fitness::Vector{Float64} = get_precomputed_fitness_pool(joinpath(@__DIR__, "data/precomputed_tables/", dataset_file_name))
-const epsilon = 0.001
 
 function fitness_function(individual)::Float64
     decimal_representation = binary_to_decimal(BitVector(individual))
@@ -32,7 +31,7 @@ function fitness_function(individual)::Float64
     base_fitness = load_base_fitness[decimal_representation]
     penalty = sum(individual)
     
-    return base_fitness - epsilon * penalty
+    return base_fitness - EPSILON * penalty
 end
 
 const number_of_features::Int = log2(1+length(load_base_fitness))
