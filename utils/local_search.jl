@@ -1,90 +1,86 @@
-module LocalSearch
-    export hamming_neighborhood_search, SLS, get_neighborhood
+"""
+    Returns all index combinations, requiring bit flips, to represent the neighborhood with hamming distance equal to h.
+"""
+function combinations(n::Int, h::Int)::Vector{Vector{Int}}
+    if h==0 return [[]] end
+    if h > n return [] end
+
+    result::Vector{Vector{Int}} = []
+
+    for i in 1:(n-h+1)
+        for tail in combinations(n-i, h-1)
+            push!(result, [i; map(x -> x + i, tail)])
+        end
+    end
+
+    return result
+end
+
+"""
+    Get the neighbors of individual with hamming distance lower than, or equal to, depth.
+"""
+function get_neighborhood(individual::BitVector, depth::Int)::Vector{BitVector}
+    n::Int = length(individual)
+    neighbors::Vector{BitVector} = []
+
+    indices::Vector{Vector{Int}} = []
+
+    for h in 1:depth
+        append!(indices, combinations(n, h))
+    end
     
-    """
-        Returns all index combinations, requiring bit flips, to represent the neighborhood with hamming distance equal to h.
-    """
-    function combinations(n::Int, h::Int)::Vector{Vector{Int}}
-        if h==0 return [[]] end
-        if h > n return [] end
+    for combination in indices
+        c::BitVector = copy(individual)
+        for index in combination 
+            c[index] = !c[index]
+        end
+        push!(neighbors, c)
+    end
 
-        result::Vector{Vector{Int}} = []
+    return neighbors
+end
 
-        for i in 1:(n-h+1)
-            for tail in combinations(n-i, h-1)
-                push!(result, [i; map(x -> x + i, tail)])
+"""
+    Find the best individual in each children’s neighborhood of hamming distance lower than, or equal to, depth. 
+"""
+function hamming_neighborhood_search(children::Vector{BitVector}, fitness_function::Function, depth::Int)::Vector{BitVector}
+    best_children = Vector{BitVector}(undef, length(children))
+
+    for i in eachindex(children)
+        candidates = get_neighborhood(children[i], depth)
+        push!(candidates, children[i])
+
+        best_index = argmax(map(fitness_function, candidates))
+
+        best_children[i] = candidates[best_index]
+    end
+    
+    return best_children
+end
+
+"""
+    SLS
+"""
+function SLS(individuals::Vector{BitVector}, fitness_function::Function, depth::Int, p::Float64)
+    final_individuals = Vector{BitVector}(undef, length(individuals))
+    
+    for i in eachindex(individuals)
+        current_individual = individuals[i]
+
+        for j in 1:depth
+            candidates = get_neighborhood(current_individual, 1)
+
+            if rand() < p # Go to random neighbor
+                current_individual = rand(candidates)
+            else
+                current_individual = ([candidates... , current_individual])[argmax(map(fitness_function, [candidates..., current_individual]))]
             end
         end
 
-        return result
+        final_individuals[i] = current_individual
     end
 
-    """
-        Get the neighbors of individual with hamming distance lower than, or equal to, depth.
-    """
-    function get_neighborhood(individual::BitVector, depth::Int)::Vector{BitVector}
-        n::Int = length(individual)
-        neighbors::Vector{BitVector} = []
-
-        indices::Vector{Vector{Int}} = []
-
-        for h in 1:depth
-            append!(indices, combinations(n, h))
-        end
-        
-        for combination in indices
-            c::BitVector = copy(individual)
-            for index in combination 
-                c[index] = !c[index]
-            end
-            push!(neighbors, c)
-        end
-
-        return neighbors
-    end
-
-    """
-        Find the best individual in each children’s neighborhood of hamming distance lower than, or equal to, depth. 
-    """
-    function hamming_neighborhood_search(children::Vector{BitVector}, fitness_function::Function, depth::Int)::Vector{BitVector}
-        best_children = Vector{BitVector}(undef, length(children))
-
-        for i in eachindex(children)
-            candidates = get_neighborhood(children[i], depth)
-            push!(candidates, children[i])
-
-            best_index = argmax(map(fitness_function, candidates))
-
-            best_children[i] = candidates[best_index]
-        end
-        
-        return best_children
-    end
-
-    """
-        SLS
-    """
-    function SLS(individuals::Vector{BitVector}, fitness_function::Function, depth::Int, p::Float64)
-        final_individuals = Vector{BitVector}(undef, length(individuals))
-        
-        for i in eachindex(individuals)
-            current_individual = individuals[i]
-
-            for j in 1:depth
-                candidates = get_neighborhood(current_individual, 1)
-
-                if rand() < p # Go to random neighbor
-                    current_individual = rand(candidates)
-                else
-                    current_individual = ([candidates... , current_individual])[argmax(map(fitness_function, [candidates..., current_individual]))]
-                end
-            end
-
-            final_individuals[i] = current_individual
-        end
-
-        return final_individuals
-    end
+    return final_individuals
 end
 
 if abspath(PROGRAM_FILE) == @__FILE__

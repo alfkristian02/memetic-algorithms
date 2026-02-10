@@ -1,60 +1,56 @@
-module PopulationOperators
-    export initialize_bit_matrix, random_selection, random_replacement, get_best_individual, roulette_wheel_selection
+using Random
+using StatsBase
 
-    using Random
-    using StatsBase
+"""
+    Initialize a bit matrix with m rows and n columns.
+"""
+function initialize_bit_matrix(m::Int, n::Int)::BitMatrix
+    return Random.bitrand((m, n))
+end
 
-    """
-        Initialize a bit matrix with m rows and n columns.
-    """
-    function initialize_bit_matrix(m::Int, n::Int)::BitMatrix
-        return Random.bitrand((m, n))
-    end
-    
-    """
-        Select n random individuals from the population.
+"""
+    Select n random individuals from the population.
 
-    """
-    function random_selection(population::BitMatrix, n::Int)::Vector{BitVector}
-        indices = rand(1:size(population, 1), n)
+"""
+function random_selection(population::BitMatrix, n::Int)::Vector{BitVector}
+    indices = rand(1:size(population, 1), n)
 
-        return eachrow(population)[indices]
-    end
+    return eachrow(population)[indices]
+end
 
-    """
-        Roulette wheel selection.
-    """
-    function roulette_wheel_selection(population::BitMatrix, fitness_function::Function, n::Int)::Vector{BitVector}
-        fitness_map = map(fitness_function, eachrow(population))
+"""
+    Roulette wheel selection.
+"""
+function roulette_wheel_selection(population::BitMatrix, fitness_function::Function, n::Int)::Vector{BitVector}
+    fitness_map = map(fitness_function, eachrow(population))
 
-        probability_proportions = fitness_map ./ sum(fitness_map)
+    probability_proportions = fitness_map ./ sum(fitness_map)
 
-        selected = sample(eachrow(population), Weights(probability_proportions), n)
+    selected = sample(eachrow(population), Weights(probability_proportions), n)
 
-        return Vector{BitVector}(selected)
-    end
+    return Vector{BitVector}(selected)
+end
 
-    """
-        Replace randomly selected individuals in the population with the incoming ones.
+"""
+    Replace randomly selected individuals in the population with the incoming ones.
 
-    """
-    function random_replacement(population::BitMatrix, incoming_individuals::Vector{BitVector})::BitMatrix
-        indices = rand(1:size(population, 1), length(incoming_individuals))
+"""
+function random_replacement(population::BitMatrix, incoming_individuals::Vector{BitVector})::BitMatrix
+    indices = rand(1:size(population, 1), length(incoming_individuals))
 
-        population[indices, :] = vcat(incoming_individuals...)
+    population[indices, :] = vcat(incoming_individuals...)
 
-        return population
-    end
+    return population
+end
 
-    """
-        Get the best individual and fitness of the individual among the candidates, given a fitness pool.
+"""
+    Get the best individual and fitness of the individual among the candidates, given a fitness pool.
 
-    """
-    function get_best_individual(candidates::BitMatrix, fitness_function)::Tuple{BitVector, Float64}
-        fitness, best_index = findmax(map(fitness_function, eachrow(candidates)))
+"""
+function get_best_individual(candidates::BitMatrix, fitness_function)::Tuple{BitVector, Float64}
+    fitness, best_index = findmax(map(fitness_function, eachrow(candidates)))
 
-        return candidates[best_index, :], fitness
-    end
+    return candidates[best_index, :], fitness
 end
 
 if abspath(PROGRAM_FILE) == @__FILE__        

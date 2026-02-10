@@ -4,18 +4,11 @@ using Dates
 
 include("config.jl")
 include("data/get_fitness_pool.jl")
-include("utils/number_conversion.jl")
-include("utils/first_try.jl")
-include("utils/SGA.jl")
-include("utils/local_search.jl")
+include("utils/Utils.jl")
 
 using .ConfigParameters: dataset_file_name, fitness_function, population_size, number_of_generations, mutation_rate, local_search_frequencies, local_search_depths, save_run, crossover_probability, sls_p
 using .GetFitnessPool: get_precomputed_fitness_pool
-using .BinaryDecimalConversion: binary_to_decimal, decimal_to_binary
-using .SGA: sga
-using .LocalSearch: SLS
-
-const dataset_file_name::String = "05-heart-c_dt_mat-1.jld2" # 05-heart-c_dt_mat-1.jld2 || 07-credit-a_dt_matG.jld2 || 10-hepatitis_dt_matG.jld2
+using .Utils
 
 println("Starting computation...")
 
